@@ -1,7 +1,7 @@
 package model;
 
 
-import java.util.Date;
+import java.util.*;
 
 public class InterestingMoment {
     private String type;

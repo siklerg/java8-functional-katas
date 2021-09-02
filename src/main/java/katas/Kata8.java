@@ -1,15 +1,13 @@
 package katas;
 
 import com.codepoetics.protonpack.StreamUtils;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import model.Bookmark;
 import model.Movie;
-import model.MovieList;
 import util.DataUtil;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 /*
@@ -18,15 +16,25 @@ import java.util.stream.*;
     Output: List of ImmutableMap.of("videoId", "5", "bookmarkId", "3")
 */
 public class Kata8 {
-    public static List<Map> execute() {
+
+    private Kata8() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static List<Map<String, String>> execute() {
         List<Movie> movies = DataUtil.getMovies();
         List<Bookmark> bookMarks = DataUtil.getBookMarks();
 
-        // StreamUtils.zip()
-        List<Map> responseList = StreamUtils.zip(movies.stream(), bookMarks.stream(),
-                (a, b) -> ImmutableMap.of("videoId", a.getId(), "bookmarkId", b.getId()))
+        return StreamUtils.zip(
+                        movies.stream(),
+                        bookMarks.stream(),
+                        createResponseMap())
                 .collect(Collectors.toList());
+    }
 
-        return responseList;
+    private static BiFunction<Movie, Bookmark, Map<String, String>> createResponseMap() {
+        return (a, b) -> ImmutableMap.of(
+                "videoId", a.getId().toString(),
+                "bookmarkId", b.getId().toString());
     }
 }

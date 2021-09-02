@@ -1,11 +1,11 @@
 package katas;
 
-import com.google.common.collect.ImmutableList;
 import model.Movie;
 import model.MovieList;
 import util.DataUtil;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 /*
@@ -14,14 +14,21 @@ import java.util.stream.*;
     Output: List of Integers
 */
 public class Kata3 {
+
+    private Kata3() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static List<Integer> execute() {
         List<MovieList> movieLists = DataUtil.getMovieLists();
-        List<Integer> ids = movieLists
-                .stream()
-                .flatMap(m -> m.getVideos()
-                        .stream()
-                        .map(Movie::getId))
+        return movieLists.stream()
+                .flatMap(getMovieIds())
                 .collect(Collectors.toList());
-        return ids;
+    }
+
+    private static Function<MovieList, Stream<Integer>> getMovieIds() {
+        return m -> m.getVideos()
+                .stream()
+                .map(Movie::getId);
     }
 }

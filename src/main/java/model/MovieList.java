@@ -1,6 +1,6 @@
 package model;
 
-import java.util.List;
+import java.util.*;
 
 public class MovieList {
     private String name;

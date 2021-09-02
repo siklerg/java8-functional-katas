@@ -2,10 +2,12 @@ package katas;
 
 import com.google.common.collect.ImmutableMap;
 import model.BoxArt;
+import model.Movie;
 import model.MovieList;
 import util.DataUtil;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 /*
@@ -14,29 +16,31 @@ import java.util.stream.*;
     Output: List of ImmutableMap.of("id", "5", "title", "Bad Boys", "boxart": BoxArt)
 */
 public class Kata4 {
-    public static List<Map> execute() {
-        List<MovieList> movieLists = DataUtil.getMovieLists();
-        List<Map> selection = movieLists
-                .stream()
-                .flatMap(m -> m.getVideos().stream()
-                        .map(v -> ImmutableMap.of("id", v.getId(), "title", v.getTitle(), "boxart", new BoxArt(150, 200, getBoxArtUrl(v.getBoxarts())))))
-//                        .map(v -> ImmutableMap.of("id", v.getId(), "title", v.getTitle(), "boxart",
-//                                boxArts -> v.getBoxarts()
-//                                        .stream()
-//                                        .filter(boxArt -> boxArt.getWidth() == 150)
-//                                        .findFirst()
-//                                        .get()
-//                                        .getUrl()
-//                        )))
-                .collect(Collectors.toList());
-        return selection;
+
+    private Kata4() {
+        throw new IllegalStateException("Utility class");
     }
 
-    public static String getBoxArtUrl(List<BoxArt> v){
-        Optional<BoxArt> boxArt = v.stream()
+    public static List<Map<String, Object>> execute() {
+        List<MovieList> movieLists = DataUtil.getMovieLists();
+        return movieLists.stream()
+                .flatMap(createResponseMap())
+                .collect(Collectors.toList());
+    }
+
+    private static Function<MovieList, Stream<Map<String, Object>>> createResponseMap() {
+        return m -> m.getVideos().stream()
+                .map(movie -> ImmutableMap.of(
+                        "id", movie.getId(),
+                        "title", movie.getTitle(),
+                        "boxart", getBoxArt(movie)));
+    }
+
+    public static BoxArt getBoxArt(Movie movie) {
+        BoxArt boxArt = movie.getBoxarts().stream()
                 .filter(ba -> ba.getWidth() == 150)
-                .findFirst();
-        String url = boxArt.isPresent() ? boxArt.get().getUrl() : "";
-    return url;
+                .findFirst()
+                .orElseThrow(NoSuchElementException::new);
+        return boxArt;
     }
 }

@@ -1,6 +1,5 @@
 package katas;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import util.DataUtil;
 
@@ -57,31 +56,49 @@ import java.util.stream.*;
     Output: the given datastructure
 */
 public class Kata11 {
-    public static List<Map> execute() {
-        List<Map> lists = DataUtil.getLists();
-        List<Map> videos = DataUtil.getVideos();
-        List<Map> boxArts = DataUtil.getBoxArts();
-        List<Map> bookmarkList = DataUtil.getBookmarkList();
 
-        List<Map> responseList = lists.stream()
+    private static final List<Map<String, Object>> lists = DataUtil.getLists();
+    private static final List<Map<String, Object>> videos = DataUtil.getVideos();
+    private static final List<Map<String, Object>> boxArts = DataUtil.getBoxArts();
+    private static final List<Map<String, Integer>> bookmarkList = DataUtil.getBookmarkList();
+
+    private Kata11() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static List<Map<String, Object>> execute() {
+        return lists.stream()
                 .map(listsMap -> ImmutableMap.of(
                         "name", listsMap.get("name"),
-                        "videos", videos.stream()
-                                .filter(videoMap -> videoMap.get("listId").equals(listsMap.get("id")))
-                                .map(videoMap -> ImmutableMap.of(
-                                        "id", videoMap.get("id"),
-                                        "title", videoMap.get("title"),
-                                        "time", bookmarkList.stream()
-                                                .filter(bookmark -> bookmark.get("videoId").equals(videoMap.get("id")))
-                                                .findFirst()
-                                                .get().get("time"),
-                                        "boxart", boxArts.stream()
-                                                .filter(boxarts -> boxarts.get("videoId").equals(videoMap.get("id")))
-                                                .reduce((a, b) -> (int) a.get("width") < (int) b.get("width") ? a : b)
-                                                .get().get("url")))
-                                .collect(Collectors.toList())))
+                        "videos", getVideo((int) listsMap.get("id"))))
                 .collect(Collectors.toList());
+    }
 
-        return responseList;
+    private static List<Map<String, Object>> getVideo(int listId) {
+        return videos.stream()
+                .filter(videoMap -> videoMap.get("listId").equals(listId))
+                .map(videoMap -> ImmutableMap.of(
+                        "id", videoMap.get("id"),
+                        "title", videoMap.get("title"),
+                        "time", getTime((int) videoMap.get("id")),
+                        "boxart", getMinArtBoxUrl((int) videoMap.get("id"))))
+                .collect(Collectors.toList());
+    }
+
+    private static int getTime(int videoId) {
+        return bookmarkList.stream()
+                .filter(bookmark -> bookmark.get("videoId").equals(videoId))
+                .findFirst()
+                .map(bookmark -> bookmark.get("time"))
+                .orElseThrow(NoSuchElementException::new);
+    }
+
+    private static String getMinArtBoxUrl(int videoId) {
+        return boxArts.stream()
+                .filter(boxarts -> boxarts.get("videoId").equals(videoId))
+                .reduce((a, b) -> (int) a.get("width") < (int) b.get("width") ? a : b)
+                .map(boxArt -> boxArt.get("url").toString())
+                .orElseThrow(NoSuchElementException::new);
     }
 }
+

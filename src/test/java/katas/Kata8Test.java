@@ -1,15 +1,21 @@
 package katas;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class Kata8Test {
 
     @Test
     public void testExecute() {
-        Assert.assertThat(Kata8.execute(), equalTo(4));
+        List<Map<String, String>> kataList8 = Kata8.execute();
+        assertEquals(3, kataList8.size());
+        if (!kataList8.get(0).isEmpty()) {
+            assertEquals("70111470", kataList8.get(0).get("videoId"));
+            assertEquals("470", kataList8.get(0).get("bookmarkId"));
+        }
     }
 }

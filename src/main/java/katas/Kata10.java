@@ -1,13 +1,10 @@
 package katas;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import model.MovieList;
 import util.DataUtil;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 /*
@@ -52,21 +49,32 @@ import java.util.stream.*;
     Output: the given datastructure
 */
 public class Kata10 {
-    public static List<Map> execute() {
-        List<Map> lists = DataUtil.getLists();
-        List<Map> videos = DataUtil.getVideos();
 
-        List<Map> responseList = lists.stream()
-                .map(listsMap -> ImmutableMap.of(
-                        "name", listsMap.get("name"),
-                        "videos", videos.stream()
-                                .filter(videosMap -> videosMap.get("listId").equals(listsMap.get("id")))
-                                .map(videoMap -> ImmutableMap.of(
-                                        "id", videoMap.get("id"),
-                                        "title", videoMap.get("title")))
-                                .collect(Collectors.toList())))
+    private Kata10() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static List<Map<String, Object>> execute() {
+        List<Map<String, Object>> lists = DataUtil.getLists();
+        List<Map<String, Object>> videos = DataUtil.getVideos();
+
+        return lists.stream()
+                .map(createResponseList(videos))
                 .collect(Collectors.toList());
+    }
 
-        return responseList;
+    private static Function<Map<String, Object>, ImmutableMap<String, Object>> createResponseList(List<Map<String, Object>> videos) {
+        return listsMap -> ImmutableMap.of(
+                "name", listsMap.get("name"),
+                "videos", getVideosForList(listsMap, videos));
+    }
+
+    private static List<Map<String, Object>> getVideosForList(Map<String, Object> listsMap, List<Map<String, Object>> videos){
+        return videos.stream()
+                .filter(videosMap -> videosMap.get("listId").equals(listsMap.get("id")))
+                .map(videoMap -> ImmutableMap.of(
+                        "id", videoMap.get("id"),
+                        "title", videoMap.get("title")))
+                .collect(Collectors.toList());
     }
 }
